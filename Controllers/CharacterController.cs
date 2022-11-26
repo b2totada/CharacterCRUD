@@ -2,15 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using backend.DTOs.Character;
 using backend.Services.CharacterService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    //Controller for CharacterService. Provides an additional layer between client and service to increase scalability.
     [ApiController]
     [Route("api/[controller]")]
     public class CharacterController : ControllerBase
     {
+        //CharacterService injection in constructor
         private readonly ICharacterService _characterService;
         public CharacterController(ICharacterService characterService)
         {
@@ -18,22 +21,24 @@ namespace backend.Controllers
             
         }
 
+        #region Service Calls
         [HttpGet("GetAll")]
-        public ActionResult<List<Character>> Get()
+        public async Task<ActionResult<ServiceResponse<List<GetCharacterDTO>>>> Get()
         {
-            return Ok(_characterService.GetAllCharacters());
+            return Ok(await _characterService.GetAllCharacters());
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Character> GetSingle(int id)
+        public async Task<ActionResult<ServiceResponse<GetCharacterDTO>>> GetSingle(int id)
         {
-            return Ok(_characterService.GetCharacterById(id));
+            return Ok(await _characterService.GetCharacterById(id));
         }
 
         [HttpPost]
-        public ActionResult<List<Character>> AddCharacter(Character newCharacter)
+        public async Task<ActionResult<ServiceResponse<List<GetCharacterDTO>>>> AddCharacter(AddCharacterDTO newCharacter)
         {
-            return Ok(_characterService.AddCharacter(newCharacter));
+            return Ok(await _characterService.AddCharacter(newCharacter));
         }
+        #endregion
     }
 }

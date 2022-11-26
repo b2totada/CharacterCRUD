@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace backend.Models
+namespace backend.DTOs.Character
 {
-    //A model is an exact representation(map) of the data in the db
-
-    //Models(maps) the Character table in the db
-    public class Character
+    //DTO for the client to get a character from the db
+    public class GetCharacterDTO
     {
+        //It's the same for now as the model
         public int Id { get; set; }
         public string Name { get; set; } = "Frodo";
         public int HitPoints { get; set; } = 100;
