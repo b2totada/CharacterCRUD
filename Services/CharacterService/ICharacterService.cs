@@ -18,5 +18,9 @@ namespace backend.Services.CharacterService
         Task<ServiceResponse<GetCharacterDTO>> GetCharacterById(int id);
         //Adds a new character to the db and returns all the characters from the db in a list.
         Task<ServiceResponse<List<GetCharacterDTO>>> AddCharacter(AddCharacterDTO newCharacter);
+        //Modifies a character in the db
+        Task<ServiceResponse<GetCharacterDTO>> UpdateCharacter(UpdateCharacterDTO updatedCharacter);
+        //Deletes a character from the db
+        Task<ServiceResponse<List<GetCharacterDTO>>> DeleteCharacter(int id);
     }
 }

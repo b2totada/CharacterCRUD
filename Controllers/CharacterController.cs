@@ -39,6 +39,30 @@ namespace backend.Controllers
         {
             return Ok(await _characterService.AddCharacter(newCharacter));
         }
+
+        [HttpPut]
+        public async Task<ActionResult<ServiceResponse<GetCharacterDTO>>> UpdateCharacter(UpdateCharacterDTO updatedCharacter)
+        {
+            var serviceResponse = await _characterService.UpdateCharacter(updatedCharacter);
+            if (!serviceResponse.Success)
+            {
+                return NotFound(serviceResponse);
+            }
+
+            return Ok(serviceResponse);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ServiceResponse<List<GetCharacterDTO>>>> DeleteCharacter(int id)
+        {
+            var serviceResponse = await _characterService.DeleteCharacter(id);
+            if (!serviceResponse.Success)
+            {
+                return NotFound(serviceResponse);
+            }
+
+            return Ok(serviceResponse);
+        }
         #endregion
     }
 }
