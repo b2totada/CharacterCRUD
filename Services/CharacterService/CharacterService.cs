@@ -3,25 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using backend.Data;
 using backend.DTOs.Character;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services.CharacterService
 {
     //Implementation class for ICharacterService.
     public class CharacterService : ICharacterService
     {
-        //Mock data for now
-        private static List<Character> characters = new List<Character>()
-        {
-            new Character(),
-            new Character{ Id = 1, Name = "Sam" }
-        };
-
-        //AutoMapper injection in constructor
+        //AutoMapper and EF injection in constructor
         private readonly IMapper _mapper;
-        public CharacterService(IMapper mapper)
+        private readonly DataContext _context;
+
+        public CharacterService(IMapper mapper, DataContext context)
         {
             _mapper = mapper;
+            _context = context;
         }
 
         #region Available methods
@@ -29,9 +27,11 @@ namespace backend.Services.CharacterService
         {
             var serviceResponse = new ServiceResponse<List<GetCharacterDTO>>();
             Character character = _mapper.Map<Character>(newCharacter);
-            character.Id = characters.Max(c => c.Id) + 1;
-            characters.Add(character);
-            serviceResponse.Data = characters.Select(c => _mapper.Map<GetCharacterDTO>(c)).ToList();
+            _context.Characters.Add(character); //this won't add the character to the db just starts tracking it to be added later
+            await _context.SaveChangesAsync(); //this add's it
+            serviceResponse.Data = await _context.Characters
+                .Select(c => _mapper.Map<GetCharacterDTO>(c))
+                .ToListAsync();
             serviceResponse.Message = "Your new character has been saved";
 
             return serviceResponse;
@@ -39,17 +39,18 @@ namespace backend.Services.CharacterService
 
         public async Task<ServiceResponse<List<GetCharacterDTO>>> GetAllCharacters()
         {
-            return new ServiceResponse<List<GetCharacterDTO>> 
-            {
-                Data = characters.Select(c => _mapper.Map<GetCharacterDTO>(c)).ToList()
-            };
+            var serviceResponse = new ServiceResponse<List<GetCharacterDTO>>();
+            var dbCharacters = await _context.Characters.ToListAsync();
+            serviceResponse.Data = dbCharacters.Select(c => _mapper.Map<GetCharacterDTO>(c)).ToList();
+
+            return serviceResponse;
         }
 
         public async Task<ServiceResponse<GetCharacterDTO>> GetCharacterById(int id)
         {
             var serviceResponse = new ServiceResponse<GetCharacterDTO>();
-            var character = characters.FirstOrDefault(c => c.Id == id);
-            serviceResponse.Data = _mapper.Map<GetCharacterDTO>(character); //<> = the object to change into, () = the source
+            var dbCharacter = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
+            serviceResponse.Data = _mapper.Map<GetCharacterDTO>(dbCharacter); //<> = the object to change into, () = the source
 
             return serviceResponse;
         }
@@ -60,8 +61,10 @@ namespace backend.Services.CharacterService
 
             try
             {
-                Character character = characters.FirstOrDefault(c => c.Id == updatedCharacter.Id);
+                var character = await _context.Characters
+                    .FirstOrDefaultAsync(c => c.Id == updatedCharacter.Id);
                 _mapper.Map(updatedCharacter, character);
+                await _context.SaveChangesAsync();
                 serviceResponse.Data = _mapper.Map<GetCharacterDTO>(character);
                 serviceResponse.Message = "Your character has been modified and saved";
             }
@@ -80,9 +83,10 @@ namespace backend.Services.CharacterService
 
             try
             {
-                Character character = characters.First(c => c.Id == id);
-                characters.Remove(character);
-                serviceResponse.Data = characters.Select(c => _mapper.Map<GetCharacterDTO>(c)).ToList();
+                Character character = await _context.Characters.FirstAsync(c => c.Id == id);
+                _context.Characters.Remove(character);
+                await _context.SaveChangesAsync();
+                serviceResponse.Data = _context.Characters.Select(c => _mapper.Map<GetCharacterDTO>(c)).ToList();
                 serviceResponse.Message = "Your character has been deleted";
             }
             catch (Exception ex)
