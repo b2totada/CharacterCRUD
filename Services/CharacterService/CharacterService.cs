@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using AutoMapper;
 using backend.Data;
@@ -49,8 +50,20 @@ namespace backend.Services.CharacterService
         public async Task<ServiceResponse<GetCharacterDTO>> GetCharacterById(int id)
         {
             var serviceResponse = new ServiceResponse<GetCharacterDTO>();
-            var dbCharacter = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
-            serviceResponse.Data = _mapper.Map<GetCharacterDTO>(dbCharacter); //<> = the object to change into, () = the source
+            try
+            {
+                var dbCharacter = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
+                serviceResponse.Data = _mapper.Map<GetCharacterDTO>(dbCharacter); //<> = the object to change into, () = the source
+                if (serviceResponse.Data == null)
+                {
+                    throw new Exception("Character not found");
+                }
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Success = false;
+                serviceResponse.Message = ex.Message;
+            }
 
             return serviceResponse;
         }
@@ -66,6 +79,10 @@ namespace backend.Services.CharacterService
                 _mapper.Map(updatedCharacter, character);
                 await _context.SaveChangesAsync();
                 serviceResponse.Data = _mapper.Map<GetCharacterDTO>(character);
+                if (serviceResponse.Data == null)
+                {
+                    throw new Exception("Character not found");
+                }
                 serviceResponse.Message = "Your character has been modified and saved";
             }
             catch (Exception ex)

@@ -14,14 +14,14 @@ namespace backend.Migrations
                 name: "Characters",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    HitPoints = table.Column<int>(type: "int", nullable: false),
-                    Strenght = table.Column<int>(type: "int", nullable: false),
-                    Defense = table.Column<int>(type: "int", nullable: false),
-                    Intelligence = table.Column<int>(type: "int", nullable: false),
-                    Class = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    HitPoints = table.Column<int>(type: "INTEGER", nullable: false),
+                    Strenght = table.Column<int>(type: "INTEGER", nullable: false),
+                    Defense = table.Column<int>(type: "INTEGER", nullable: false),
+                    Intelligence = table.Column<int>(type: "INTEGER", nullable: false),
+                    Class = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

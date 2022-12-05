@@ -25,13 +25,16 @@ namespace backend.Controllers
         [HttpGet("GetAll")]
         public async Task<ActionResult<ServiceResponse<List<GetCharacterDTO>>>> Get()
         {
-            return Ok(await _characterService.GetAllCharacters());
+            var serviceResponse = await _characterService.GetAllCharacters();
+            serviceResponse.Message = serviceResponse.Data.Count == 0 ? "No characters in db" : "";
+            return Ok(serviceResponse);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ServiceResponse<GetCharacterDTO>>> GetSingle(int id)
         {
-            return Ok(await _characterService.GetCharacterById(id));
+            var serviceResponse = await _characterService.GetCharacterById(id);
+            return serviceResponse.Success ? Ok(serviceResponse) : NotFound(serviceResponse);
         }
 
         [HttpPost]
@@ -44,24 +47,14 @@ namespace backend.Controllers
         public async Task<ActionResult<ServiceResponse<GetCharacterDTO>>> UpdateCharacter(UpdateCharacterDTO updatedCharacter)
         {
             var serviceResponse = await _characterService.UpdateCharacter(updatedCharacter);
-            if (!serviceResponse.Success)
-            {
-                return NotFound(serviceResponse);
-            }
-
-            return Ok(serviceResponse);
+            return serviceResponse.Success ? Ok(serviceResponse) : NotFound(serviceResponse);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<ServiceResponse<List<GetCharacterDTO>>>> DeleteCharacter(int id)
         {
             var serviceResponse = await _characterService.DeleteCharacter(id);
-            if (!serviceResponse.Success)
-            {
-                return NotFound(serviceResponse);
-            }
-
-            return Ok(serviceResponse);
+            return serviceResponse.Success ? Ok(serviceResponse) : NotFound(serviceResponse);
         }
         #endregion
     }
